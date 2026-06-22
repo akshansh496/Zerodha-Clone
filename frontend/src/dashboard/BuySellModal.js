@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatCurrency } from '../utils/formatters';
 
 export default function BuySellModal({ activeStock, mode, onClose, onSubmitOrder }) {
     const [qty, setQty] = useState('1');
@@ -46,14 +47,6 @@ export default function BuySellModal({ activeStock, mode, onClose, onSubmitOrder
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        }).format(val);
     };
 
     const totalCost = parseInt(qty) * (type === 'LIMIT' ? parseFloat(price) || 0 : activeStock.price);

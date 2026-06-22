@@ -1,20 +1,26 @@
 import React, { useEffect, useRef } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import PieChartIcon from '@mui/icons-material/PieChart';
+import { formatCurrency } from '../utils/formatters';
 
-export default function Summary({ user, holdings }) {
+export default function Summary(props) {
+    const context = useOutletContext();
+    const user = context?.user || props.user;
+    const holdings = context?.holdings || props.holdings;
+
     const canvasRef = useRef(null);
 
-    const investedVal = holdings.reduce((sum, h) => sum + (h.qty * h.avgPrice), 0);
-    const currentVal = holdings.reduce((sum, h) => sum + (h.qty * h.price), 0);
+    const investedVal = holdings?.reduce((sum, h) => sum + (h.qty * h.avgPrice), 0) || 0;
+    const currentVal = holdings?.reduce((sum, h) => sum + (h.qty * h.price), 0) || 0;
     const totalPnL = currentVal - investedVal;
     const pnlPercent = investedVal > 0 ? (totalPnL / investedVal) * 100 : 0;
     const totalEquity = currentVal + (user?.funds || 0);
 
     useEffect(() => {
-        if (!canvasRef.current || holdings.length === 0) return;
+        if (!canvasRef.current || !holdings || holdings.length === 0) return;
 
         const ctx = canvasRef.current.getContext('2d');
         ctx.clearRect(0, 0, 200, 200);
@@ -53,14 +59,6 @@ export default function Summary({ user, holdings }) {
         ctx.fill();
 
     }, [holdings]);
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        }).format(val);
-    };
 
     return (
         <div>
@@ -124,7 +122,7 @@ export default function Summary({ user, holdings }) {
                         <span>Portfolio Asset Allocation</span>
                     </div>
 
-                    {holdings.length === 0 ? (
+                    {!holdings || holdings.length === 0 ? (
                         <div className="text-center p-5 text-muted">
                             <AccountBalanceWalletIcon style={{ fontSize: '48px', color: '#ccc', marginBottom: '10px' }} />
                             <p className="small mb-0">No holdings yet. Search and buy stocks in the watchlist to build your portfolio!</p>

@@ -11,6 +11,8 @@ let stocks = [
     { name: 'ICICIBANK', fullName: 'ICICI Bank Ltd.', price: 945.80, prevPrice: 948.20 }
 ];
 
+let broadcastCallback = null;
+
 const getStocks = () => {
     return stocks.map(stock => {
         const diff = stock.price - stock.prevPrice;
@@ -33,12 +35,20 @@ const updatePrices = () => {
             price: parseFloat(newPrice.toFixed(2))
         };
     });
+    if (broadcastCallback) {
+        broadcastCallback(getStocks());
+    }
 };
 
 // Start simulated ticks
 setInterval(updatePrices, 2500);
 
+const setBroadcastCallback = (cb) => {
+    broadcastCallback = cb;
+};
+
 module.exports = {
     getStocks,
-    stocksRaw: () => stocks
+    stocksRaw: () => stocks,
+    setBroadcastCallback
 };

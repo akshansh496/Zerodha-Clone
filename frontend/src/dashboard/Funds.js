@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import PaymentIcon from '@mui/icons-material/Payment';
+import { formatCurrency } from '../utils/formatters';
 
-export default function Funds({ user, onAddFunds }) {
+export default function Funds(props) {
+    const context = useOutletContext();
+    const user = context?.user || props.user;
+    const onAddFunds = context?.onAddFunds || props.onAddFunds;
+
     const [amount, setAmount] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -29,14 +35,6 @@ export default function Funds({ user, onAddFunds }) {
         } finally {
             setLoading(false);
         }
-    };
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        }).format(val || 0);
     };
 
     return (

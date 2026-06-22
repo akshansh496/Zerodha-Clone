@@ -1,95 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useNavigate, NavLink, Outlet } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
+import usePortfolio from '../hooks/usePortfolio';
+import useOrders from '../hooks/useOrders';
+import useStocks from '../hooks/useStocks';
+import useWatchlist from '../hooks/useWatchlist';
+import useSocket from '../hooks/useSocket';
 import Watchlist from './Watchlist';
-import Summary from './Summary';
-import Holdings from './Holdings';
-import Positions from './Positions';
-import Orders from './Orders';
-import Funds from './Funds';
 import BuySellModal from './BuySellModal';
-import './dashboard.css';
+import TradingChart from './TradingChart';
+import { WatchlistSkeleton } from '../components/Skeletons';
 
 export default function Dashboard() {
-    const { user, isAuthenticated, loading, logout, refreshProfile } = useAuth();
     const navigate = useNavigate();
+    
+    // 1. Hook up global Zustand state via hooks
+    const { user, isAuthenticated, loading: authLoading } = useAuth();
+    const { holdings, positions, orders, fetchPortfolio, addFunds } = usePortfolio();
+    const { placeOrder, cancelOrder } = useOrders();
+    const { stocks, fetchStocks } = useStocks();
+    const { watchlist, fetchWatchlist, addWatchlist, removeWatchlist, saveReorderedWatchlist } = useWatchlist();
 
-    const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, orders, holdings, positions, funds
-    const [stocks, setStocks] = useState([]);
-    const [holdings, setHoldings] = useState([]);
-    const [positions, setPositions] = useState([]);
-    const [orders, setOrders] = useState([]);
+    // 2. Initialize real-time WebSockets
+    useSocket();
+
     const [modalOpen, setModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState('BUY'); // BUY or SELL
     const [selectedStock, setSelectedStock] = useState(null);
+    const [selectedStockForChart, setSelectedStockForChart] = useState(null);
 
-    const API_URL = 'http://localhost:5001/api';
-
-    // 1. Authenticate check
+    // Fetch initial user settings
     useEffect(() => {
-        if (!loading && !isAuthenticated) {
+        if (!authLoading && !isAuthenticated) {
             navigate('/login');
+            return;
         }
-    }, [isAuthenticated, loading, navigate]);
 
-    // 2. Fetch market stocks (polling every 2.5s)
-    useEffect(() => {
-        if (!isAuthenticated) return;
-
-        const fetchStocks = async () => {
-            try {
-                const res = await fetch(`${API_URL}/stocks`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setStocks(data);
-                }
-            } catch (err) {
-                console.error('Error fetching stocks:', err);
-            }
-        };
-
-        fetchStocks();
-        const interval = setInterval(fetchStocks, 2500);
-        return () => clearInterval(interval);
-    }, [isAuthenticated]);
-
-    // 3. Fetch holdings, positions, orders, and funds (polling every 3s to reflect limit executions)
-    const fetchUserData = async () => {
-        if (!isAuthenticated) return;
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
-        const headers = { 'Authorization': `Bearer ${token}` };
-
-        try {
-            // Fetch Holdings
-            const holdingsRes = await fetch(`${API_URL}/holdings`, { headers });
-            if (holdingsRes.ok) setHoldings(await holdingsRes.json());
-
-            // Fetch Positions
-            const positionsRes = await fetch(`${API_URL}/positions`, { headers });
-            if (positionsRes.ok) setPositions(await positionsRes.json());
-
-            // Fetch Orders
-            const ordersRes = await fetch(`${API_URL}/orders`, { headers });
-            if (ordersRes.ok) setOrders(await ordersRes.json());
-
-            // Refresh user profile balance
-            refreshProfile();
-        } catch (err) {
-            console.error('Error fetching user data:', err);
-        }
-    };
-
-    useEffect(() => {
         if (isAuthenticated) {
-            fetchUserData();
-            const interval = setInterval(fetchUserData, 3000);
-            return () => clearInterval(interval);
+            fetchStocks();
+            fetchWatchlist();
+            fetchPortfolio();
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, authLoading, navigate, fetchStocks, fetchWatchlist, fetchPortfolio]);
 
-    if (loading) {
+    if (authLoading) {
         return (
             <div className="d-flex align-items-center justify-content-center" style={{ height: '100vh' }}>
                 <div className="spinner-border text-primary" role="status">
@@ -101,7 +55,7 @@ export default function Dashboard() {
 
     if (!user) return null;
 
-    // Index calculation helpers (tied to watchlist ticks)
+    // Index calculation helpers (tied to dynamic socket ticks)
     const getNiftyIndex = () => {
         const infy = stocks.find(s => s.name === 'INFY')?.price || 1425;
         const reliance = stocks.find(s => s.name === 'RELIANCE')?.price || 2450;
@@ -159,84 +113,20 @@ export default function Dashboard() {
         setSelectedStock(null);
     };
 
-    const handleSubmitOrder = async (orderData) => {
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${API_URL}/orders`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(orderData)
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || 'Failed to submit order');
-            }
-            // Trigger refresh
-            fetchUserData();
-        } catch (err) {
-            throw err;
-        }
-    };
-
-    const handleCancelOrder = async (orderId) => {
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${API_URL}/orders/${orderId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || 'Failed to cancel order');
-            }
-            fetchUserData();
-        } catch (err) {
-            alert(err.message);
-        }
-    };
-
-    const handleAddFunds = async (amount) => {
-        const token = localStorage.getItem('token');
-        try {
-            const res = await fetch(`${API_URL}/funds/add`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ amount })
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.message || 'Failed to add funds');
-            }
-            fetchUserData();
-        } catch (err) {
-            throw err;
-        }
-    };
-
-    const handleLogout = () => {
-        logout();
-        navigate('/');
+    const handleSelectChart = (stockName) => {
+        setSelectedStockForChart(stockName);
     };
 
     return (
         <div className="kite-dashboard">
             {/* Top Header */}
             <header className="kite-header">
-                {/* Indices summary on left */}
                 <div className="d-flex align-items-center gap-4">
                     <div className="kite-logo">
                         <img src="/media/logo.svg" alt="Zerodha Logo" />
                     </div>
                     
-                    <div className="d-flex align-items-center gap-3 border-start ps-3" style={{ fontSize: '11.5px' }}>
+                    <div className="d-flex align-items-center gap-3 border-start ps-3" style={{ fontSize: '11px' }}>
                         <div>
                             <span className="text-muted fw-medium me-1">NIFTY 50</span>
                             <span className={`fw-semibold ${nifty.isDown ? 'text-down' : 'text-up'}`}>{nifty.value}</span>
@@ -254,89 +144,119 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Tabs Menu in Middle */}
+                {/* Sub-routing NavLink Tabs */}
                 <ul className="kite-nav-links">
-                    <li 
-                        className={`kite-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('dashboard')}
+                    <NavLink 
+                        to="/dashboard" 
+                        end
+                        className={({ isActive }) => `kite-nav-item text-decoration-none ${isActive ? 'active' : ''}`}
                     >
                         Dashboard
-                    </li>
-                    <li 
-                        className={`kite-nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('orders')}
+                    </NavLink>
+                    <NavLink 
+                        to="/dashboard/orders" 
+                        className={({ isActive }) => `kite-nav-item text-decoration-none ${isActive ? 'active' : ''}`}
                     >
                         Orders
-                    </li>
-                    <li 
-                        className={`kite-nav-item ${activeTab === 'holdings' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('holdings')}
+                    </NavLink>
+                    <NavLink 
+                        to="/dashboard/holdings" 
+                        className={({ isActive }) => `kite-nav-item text-decoration-none ${isActive ? 'active' : ''}`}
                     >
                         Holdings
-                    </li>
-                    <li 
-                        className={`kite-nav-item ${activeTab === 'positions' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('positions')}
+                    </NavLink>
+                    <NavLink 
+                        to="/dashboard/positions" 
+                        className={({ isActive }) => `kite-nav-item text-decoration-none ${isActive ? 'active' : ''}`}
                     >
                         Positions
-                    </li>
-                    <li 
-                        className={`kite-nav-item ${activeTab === 'funds' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('funds')}
+                    </NavLink>
+                    <NavLink 
+                        to="/dashboard/funds" 
+                        className={({ isActive }) => `kite-nav-item text-decoration-none ${isActive ? 'active' : ''}`}
                     >
                         Funds
-                    </li>
+                    </NavLink>
+                    <NavLink 
+                        to="/dashboard/analytics" 
+                        className={({ isActive }) => `kite-nav-item text-decoration-none ${isActive ? 'active' : ''}`}
+                    >
+                        Analytics
+                    </NavLink>
                 </ul>
 
-                {/* Profile actions on right */}
+                {/* User Profile Info */}
                 <div className="kite-user-profile">
                     <div className="kite-user-avatar">
                         {user.username.charAt(0).toUpperCase()}
                     </div>
                     <span className="fw-semibold text-uppercase">{user.username}</span>
-                    <span className="text-muted">|</span>
-                    <button className="btn btn-link btn-sm text-decoration-none text-muted p-0" onClick={handleLogout}>
-                        Logout
-                    </button>
                 </div>
             </header>
 
-            {/* Layout Workspace */}
+            {/* Main Layout Container */}
             <div className="kite-main-container">
                 {/* Watchlist Sidebar */}
-                <Watchlist 
-                    stocks={stocks} 
-                    onBuyClick={handleBuyClick} 
-                    onSellClick={handleSellClick} 
-                />
+                {stocks.length === 0 ? (
+                    <div className="kite-sidebar">
+                        <WatchlistSkeleton />
+                    </div>
+                ) : (
+                    <Watchlist 
+                        stocks={stocks} 
+                        watchlistNames={watchlist}
+                        onBuyClick={handleBuyClick} 
+                        onSellClick={handleSellClick} 
+                        onAdd={addWatchlist}
+                        onRemove={removeWatchlist}
+                        onReorder={saveReorderedWatchlist}
+                        onSelectChart={handleSelectChart}
+                    />
+                )}
 
-                {/* Workspaces Main Tabs */}
+                {/* Workspace area rendering sub-routes and charts */}
                 <main className="kite-workspace">
-                    {activeTab === 'dashboard' && (
-                        <Summary user={user} holdings={holdings} />
+                    {/* Sliding stock chart panel */}
+                    {selectedStockForChart && (
+                        <div className="mb-4 animate-fadeIn">
+                            <div className="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <h5 className="mb-0 fw-semibold text-primary">{selectedStockForChart} Analysis</h5>
+                                <button 
+                                    className="btn btn-sm btn-outline-secondary py-0 px-2 fw-medium" 
+                                    style={{ fontSize: '11px' }}
+                                    onClick={() => setSelectedStockForChart(null)}
+                                >
+                                    Close Chart
+                                </button>
+                            </div>
+                            <TradingChart 
+                                stockName={selectedStockForChart} 
+                                livePrice={stocks.find(s => s.name === selectedStockForChart)?.price} 
+                            />
+                        </div>
                     )}
-                    {activeTab === 'orders' && (
-                        <Orders orders={orders} onCancelOrder={handleCancelOrder} />
-                    )}
-                    {activeTab === 'holdings' && (
-                        <Holdings holdings={holdings} />
-                    )}
-                    {activeTab === 'positions' && (
-                        <Positions positions={positions} />
-                    )}
-                    {activeTab === 'funds' && (
-                        <Funds user={user} onAddFunds={handleAddFunds} />
-                    )}
+                    
+                    {/* Render active nested subroute (Summary, Holdings, Orders, etc.) */}
+                    <Outlet context={{ 
+                        user, 
+                        holdings, 
+                        positions, 
+                        orders, 
+                        stocks, 
+                        onSubmitOrder: placeOrder, 
+                        onCancelOrder: cancelOrder, 
+                        onAddFunds: addFunds 
+                    }} />
                 </main>
             </div>
 
-            {/* Buy / Sell Floating Modal popup */}
+            {/* Buy/Sell Modal popup */}
             {modalOpen && selectedStock && (
                 <BuySellModal 
                     activeStock={stocks.find(s => s.name === selectedStock.name) || selectedStock}
                     mode={modalMode}
                     onClose={handleCloseModal}
-                    onSubmitOrder={handleSubmitOrder}
+                    onSubmitOrder={placeOrder}
                 />
             )}
         </div>

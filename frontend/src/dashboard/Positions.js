@@ -1,19 +1,16 @@
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { formatCurrency } from '../utils/formatters';
 
-export default function Positions({ positions }) {
+export default function Positions(props) {
+    const context = useOutletContext();
+    const positions = context?.positions || props.positions || [];
+
     const totalPnL = positions.reduce((sum, p) => {
         const cost = p.qty * p.avgPrice;
         const current = p.qty * p.price;
         return sum + (current - cost);
     }, 0);
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        }).format(val);
-    };
 
     return (
         <div>

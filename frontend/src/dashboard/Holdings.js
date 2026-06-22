@@ -1,18 +1,15 @@
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { formatCurrency } from '../utils/formatters';
 
-export default function Holdings({ holdings }) {
+export default function Holdings(props) {
+    const context = useOutletContext();
+    const holdings = context?.holdings || props.holdings || [];
+
     const totalInvested = holdings.reduce((sum, h) => sum + (h.qty * h.avgPrice), 0);
     const totalCurrent = holdings.reduce((sum, h) => sum + (h.qty * h.price), 0);
     const totalPnL = totalCurrent - totalInvested;
     const totalPnLPct = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0;
-
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        }).format(val);
-    };
 
     return (
         <div>

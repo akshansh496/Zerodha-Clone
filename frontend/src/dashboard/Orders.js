@@ -1,19 +1,11 @@
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { formatCurrency, formatDate } from '../utils/formatters';
 
-export default function Orders({ orders, onCancelOrder }) {
-    const formatCurrency = (val) => {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 2
-        }).format(val);
-    };
-
-    const formatDate = (dateStr) => {
-        const date = new Date(dateStr);
-        return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + 
-               date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
-    };
+export default function Orders(props) {
+    const context = useOutletContext();
+    const orders = context?.orders || props.orders || [];
+    const onCancelOrder = context?.onCancelOrder || props.onCancelOrder;
 
     return (
         <div>

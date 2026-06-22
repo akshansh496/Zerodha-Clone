@@ -588,3 +588,63 @@ body {
     0% { background-color: rgba(223, 81, 76, 0.25); }
     100% { background-color: transparent; }
 }
+
+/* Mobile & Tablet Responsiveness Grid Updates */
+@media (max-width: 768px) {
+    .kite-header {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    .kite-logo {
+        margin-bottom: 5px;
+    }
+
+    .kite-nav-links {
+        width: 100%;
+        justify-content: space-between;
+        overflow-x: auto;
+        padding-bottom: 5px;
+        white-space: nowrap;
+        gap: 5px;
+    }
+
+    .kite-main-container {
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+    }
+
+    .kite-sidebar {
+        width: 100%;
+        height: 350px;
+        border-right: none;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .kite-workspace {
+        padding: 20px 15px;
+        height: auto;
+        overflow: visible;
+    }
+
+    .portfolio-summary-bar {
+        flex-direction: column;
+        gap: 15px;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .summary-widget-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .kite-modal-card {
+        width: 90%;
+        max-width: 400px;
+    }
+}
+
