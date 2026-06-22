@@ -1,0 +1,590 @@
+/* Kite Dashboard Custom Styles */
+
+body {
+    background-color: #fafafa;
+    color: #444444;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.kite-dashboard {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #ffffff;
+}
+
+/* Header Navbar */
+.kite-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    padding: 0 30px;
+    border-bottom: 1px solid #eeeeee;
+    background-color: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.kite-logo img {
+    height: 22px;
+}
+
+.kite-nav-links {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.kite-nav-item {
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666666;
+    height: 100%;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.kite-nav-item:hover {
+    color: #ff5722;
+}
+
+.kite-nav-item.active {
+    color: #ff5722;
+    font-weight: 500;
+    border-bottom: 2px solid #ff5722;
+}
+
+.kite-user-profile {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color: #666666;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.kite-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #eff3f8;
+    color: #5b799e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Main Dashboard Body Layout */
+.kite-main-container {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 60px);
+    overflow: hidden;
+}
+
+/* Sidebar Watchlist */
+.kite-sidebar {
+    width: 360px;
+    border-right: 1px solid #eeeeee;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #ffffff;
+}
+
+.watchlist-search {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.watchlist-search input {
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.watchlist-search input:focus {
+    border-color: #ff5722;
+}
+
+.watchlist-items {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.watchlist-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f6f6f6;
+    cursor: pointer;
+    position: relative;
+    height: 52px;
+    transition: background-color 0.2s;
+}
+
+.watchlist-item-row:hover {
+    background-color: #fcfcfc;
+}
+
+.watchlist-item-name {
+    font-weight: 500;
+    font-size: 13.5px;
+    color: #444444;
+}
+
+.watchlist-item-prices {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 13px;
+}
+
+.watchlist-price-ltp {
+    font-weight: 500;
+}
+
+.watchlist-price-pct {
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.text-up {
+    color: #4caf50 !important;
+}
+
+.text-down {
+    color: #df514c !important;
+}
+
+/* Hover Menu */
+.watchlist-hover-menu {
+    display: none;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #ffffff;
+    box-shadow: -10px 0 15px #ffffff, 10px 0 15px #ffffff;
+    height: 100%;
+    align-items: center;
+    padding-left: 10px;
+}
+
+.watchlist-item-row:hover .watchlist-hover-menu {
+    display: flex;
+}
+
+.btn-watchlist-buy, .btn-watchlist-sell {
+    border: none;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-right: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-watchlist-buy {
+    background-color: #4184f3;
+}
+
+.btn-watchlist-sell {
+    background-color: #df514c;
+}
+
+.btn-watchlist-buy:hover, .btn-watchlist-sell:hover {
+    opacity: 0.9;
+}
+
+/* Main Content Workspace */
+.kite-workspace {
+    flex: 1;
+    padding: 30px 40px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    height: 100%;
+}
+
+.workspace-title {
+    font-size: 18px;
+    font-weight: 400;
+    color: #444444;
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Tables styling */
+.kite-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 15px;
+}
+
+.kite-table th {
+    font-weight: 400;
+    color: #9b9b9b;
+    border-bottom: 1px solid #eeeeee;
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 12px;
+}
+
+.kite-table td {
+    padding: 14px 15px;
+    border-bottom: 1px solid #f6f6f6;
+    color: #444444;
+}
+
+.kite-table tr:hover td {
+    background-color: #fafafa;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+/* Portfolio summary banner */
+.portfolio-summary-bar {
+    display: flex;
+    gap: 50px;
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 25px;
+    margin-bottom: 30px;
+}
+
+.portfolio-summary-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.portfolio-summary-label {
+    font-size: 12px;
+    color: #9b9b9b;
+    margin-bottom: 5px;
+}
+
+.portfolio-summary-value {
+    font-size: 24px;
+    font-weight: 300;
+    color: #444444;
+}
+
+/* Buy/Sell Modal popup */
+.kite-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.kite-modal-card {
+    background-color: #ffffff;
+    width: 420px;
+    border-radius: 5px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    overflow: hidden;
+    animation: slideUp 0.2s ease-out;
+}
+
+.modal-header-section {
+    color: #ffffff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header-section.buy {
+    background-color: #4184f3;
+}
+
+.modal-header-section.sell {
+    background-color: #df514c;
+}
+
+.modal-title-text {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.modal-close-btn:hover {
+    opacity: 1;
+}
+
+.modal-body-section {
+    padding: 20px;
+}
+
+.order-type-tabs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.order-type-option {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.order-type-option input {
+    margin-right: 6px;
+}
+
+.form-row-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-field-item {
+    flex: 1;
+}
+
+.form-field-item label {
+    display: block;
+    font-size: 11px;
+    color: #9b9b9b;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.form-field-item input {
+    width: 100%;
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    padding: 8px 10px;
+    font-size: 13px;
+    outline: none;
+}
+
+.form-field-item input:focus {
+    border-color: #4184f3;
+}
+
+.modal-footer-section {
+    padding: 15px 20px;
+    background-color: #fbfbfb;
+    border-top: 1px solid #eeeeee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-modal-action {
+    border: none;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn-modal-action.buy {
+    background-color: #4184f3;
+}
+
+.btn-modal-action.sell {
+    background-color: #df514c;
+}
+
+.btn-modal-cancel {
+    background: none;
+    border: 1px solid #cccccc;
+    color: #666666;
+    font-size: 13px;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.btn-modal-cancel:hover {
+    background-color: #f5f5f5;
+}
+
+/* Flash alerts and animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Dashboard Summary Card Layout */
+.summary-widget-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.summary-widget-card {
+    border: 1px solid #eeeeee;
+    border-radius: 6px;
+    padding: 25px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.summary-widget-header {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #f6f6f6;
+    padding-bottom: 10px;
+}
+
+.summary-value-large {
+    font-size: 28px;
+    font-weight: 300;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.summary-text-muted {
+    font-size: 12px;
+    color: #999999;
+}
+
+.funds-input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.funds-input-group input {
+    border: 1px solid #cccccc;
+    border-radius: 3px;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    width: 150px;
+    outline: none;
+}
+
+.funds-input-group input:focus {
+    border-color: #ff5722;
+}
+
+.btn-funds-add {
+    background-color: #ff5722;
+    color: #ffffff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 3px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-funds-add:hover {
+    background-color: #e04f1d;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 10.5px;
+    font-weight: 600;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.status-badge.completed {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.pending {
+    background-color: #fff8e1;
+    color: #f57f17;
+}
+
+.status-badge.cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.order-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.order-badge.buy {
+    background-color: #4184f3;
+}
+
+.order-badge.sell {
+    background-color: #df514c;
+}
+
+/* Pulse animation for price ticks */
+.price-pulse-up {
+    animation: flashGreen 0.8s ease-out;
+}
+
+.price-pulse-down {
+    animation: flashRed 0.8s ease-out;
+}
+
+@keyframes flashGreen {
+    0% { background-color: rgba(76, 175, 80, 0.25); }
+    100% { background-color: transparent; }
+}
+
+@keyframes flashRed {
+    0% { background-color: rgba(223, 81, 76, 0.25); }
+    100% { background-color: transparent; }
+}
